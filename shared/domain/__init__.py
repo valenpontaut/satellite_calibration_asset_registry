@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
 
@@ -51,7 +51,8 @@ class AssetVersion(BaseModel):
     blob_ref: str
 
     def is_valid_at(self, timestamp: datetime) -> bool:
-        # Half-open interval: valid_from <= timestamp < valid_to; valid_to=None means open-ended.
+        # Half-open interval:
+        # valid_from <= timestamp < valid_to; valid_to=None means open-ended.
         if timestamp.tzinfo is None:
             raise ValueError("timestamp must be timezone-aware (UTC required)")
         if timestamp < self.valid_from:
