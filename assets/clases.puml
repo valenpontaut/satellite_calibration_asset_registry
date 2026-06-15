@@ -1,0 +1,172 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam classBackgroundColor white
+skinparam classBorderColor black
+skinparam ArrowColor black
+skinparam shadowing false
+
+package "shared.domain" {
+
+    enum AssetType {
+        DARKFRAME
+        GRAYFRAME
+        VICARIOUS_CAL_GAINS
+        BODY_TO_PAYLOAD
+    }
+
+    enum StorageFormat {
+        NPY
+        JSON
+    }
+
+    enum AuditOperation {
+        CREATE
+        EXTEND
+        SPLIT
+        FULL_COVERAGE_DELETE
+        RETIRE
+    }
+
+    enum OverlapType {
+        EXTEND
+        SPLIT
+        FULL_COVERAGE
+    }
+
+    class AssetVersion {
+        +UUID id
+        +String satellite_id
+        +AssetType asset_type
+        +Integer schema_version
+        +Datetime valid_from
+        +Datetime valid_to
+        +String blob_ref
+
+        +is_valid_at(timestamp)
+    }
+
+    class AuditLogEntry {
+        +UUID id
+        +Datetime timestamp
+        +String operator_id
+        +AuditOperation operation
+        +UUID asset_version_id
+        +Map details
+    }
+
+    class AssetDefinition {
+        +AssetType asset_type
+        +Integer current_schema_version
+        +StorageFormat storage_format
+    }
+}
+
+package "shared.validation" {
+
+    interface AssetValidator {
+        +validate(file)
+    }
+
+    class Npy2DFloatArrayValidator
+    class VicariousCalGainsJsonValidator
+    class BodyToPayloadJsonValidator
+
+    class AssetValidationService {
+        +validate(asset_type, file)
+    }
+
+    class AssetDefinitionRegistry {
+        +get_definition(asset_type)
+    }
+
+    class ValidatedAsset {
+        +AssetType asset_type
+        +Integer schema_version
+        +StorageFormat storage_format
+    }
+}
+
+package "shared.repositories" {
+
+    class AdminMetadataRepository {
+        +find_overlapping()
+        +insert_version()
+        +update_version()
+        +delete_version()
+        +insert_audit_log()
+    }
+
+    class PipelineMetadataRepository {
+        +find_point_in_time()
+        +find_bulk()
+    }
+
+    class CacheRepository {
+        +get()
+        +set()
+        +get_dataset_version()
+        +incr_dataset_version()
+    }
+
+    class ObjectStorageRepository {
+        +put_object()
+        +generate_presigned_url()
+    }
+}
+
+package "admin_api.services" {
+
+    class AssetAdminService {
+        +create_asset_version()
+        +retire_asset_version()
+
+        -resolve_overlaps()
+        -classify_overlap()
+    }
+}
+
+package "pipeline_api.services" {
+
+    class AssetResolutionService {
+        +resolve_point_in_time()
+        +resolve_bulk()
+
+        -build_cache_key()
+        -ttl_for()
+    }
+}
+
+AssetVersion --> AssetType
+AssetVersion --> StorageFormat
+
+AuditLogEntry --> AuditOperation
+AuditLogEntry --> AssetVersion
+
+AssetDefinition --> AssetType
+AssetDefinition --> StorageFormat
+
+AssetValidator <|.. Npy2DFloatArrayValidator
+AssetValidator <|.. VicariousCalGainsJsonValidator
+AssetValidator <|.. BodyToPayloadJsonValidator
+
+AssetValidationService --> AssetDefinitionRegistry
+AssetValidationService --> AssetValidator
+AssetValidationService --> ValidatedAsset
+
+AdminMetadataRepository --> AssetVersion
+AdminMetadataRepository --> AuditLogEntry
+
+PipelineMetadataRepository --> AssetVersion
+
+AssetAdminService --> AssetValidationService
+AssetAdminService --> AdminMetadataRepository
+AssetAdminService --> CacheRepository
+AssetAdminService --> ObjectStorageRepository
+AssetAdminService --> OverlapType
+
+AssetResolutionService --> PipelineMetadataRepository
+AssetResolutionService --> CacheRepository
+AssetResolutionService --> ObjectStorageRepository
+
+@enduml
