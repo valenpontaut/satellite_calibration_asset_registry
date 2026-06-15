@@ -1,4 +1,5 @@
 """Unit tests for shared.validation — validator correctness and registry wiring."""
+
 from __future__ import annotations
 
 import io
@@ -27,6 +28,7 @@ EXAMPLES = Path(__file__).parent.parent.parent / "examples"
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
+
 def npy_bytes(arr: np.ndarray) -> bytes:
     buf = io.BytesIO()
     np.save(buf, arr)
@@ -42,6 +44,7 @@ def valid_2d_float64() -> bytes:
 
 
 # ── Npy2DFloatArrayValidator ─────────────────────────────────────────────────
+
 
 class TestNpy2DFloatArrayValidator:
     def setup_method(self) -> None:
@@ -86,10 +89,13 @@ class TestNpy2DFloatArrayValidator:
 
 # ── VicariousCalGainsJsonValidator ───────────────────────────────────────────
 
+
 class TestVicariousCalGainsJsonValidator:
     def setup_method(self) -> None:
         self.v = VicariousCalGainsJsonValidator()
-        self.example = (EXAMPLES / "micro_vicarious_cal_gains_newsat46.json").read_bytes()
+        self.example = (
+            EXAMPLES / "micro_vicarious_cal_gains_newsat46.json"
+        ).read_bytes()
 
     def test_example_file_passes(self) -> None:
         self.v.validate(self.example)
@@ -161,6 +167,7 @@ class TestVicariousCalGainsJsonValidator:
 
 # ── BodyToPayloadJsonValidator ───────────────────────────────────────────────
 
+
 class TestBodyToPayloadJsonValidator:
     def setup_method(self) -> None:
         self.v = BodyToPayloadJsonValidator()
@@ -178,7 +185,9 @@ class TestBodyToPayloadJsonValidator:
 
     def test_quaternion_with_5_elements_raises(self) -> None:
         with pytest.raises(AssetValidationError, match="4 elements"):
-            self.v.validate(json.dumps({"quaternion": [0.0, 0.0, 0.0, 1.0, 0.0]}).encode())
+            self.v.validate(
+                json.dumps({"quaternion": [0.0, 0.0, 0.0, 1.0, 0.0]}).encode()
+            )
 
     def test_quaternion_with_0_elements_raises(self) -> None:
         with pytest.raises(AssetValidationError, match="4 elements"):
@@ -209,6 +218,7 @@ class TestBodyToPayloadJsonValidator:
 
 
 # ── AssetDefinitionRegistry ──────────────────────────────────────────────────
+
 
 class TestAssetDefinitionRegistry:
     def setup_method(self) -> None:
@@ -274,6 +284,7 @@ class TestAssetDefinitionRegistry:
 
 
 # ── AssetValidationService ───────────────────────────────────────────────────
+
 
 class TestAssetValidationService:
     def setup_method(self) -> None:

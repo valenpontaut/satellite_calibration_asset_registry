@@ -1,4 +1,5 @@
 """Unit tests for shared.domain — temporal correctness focus."""
+
 from __future__ import annotations
 
 import uuid
@@ -43,6 +44,7 @@ def make_version(
 
 # ── is_valid_at: open-ended window (valid_to=None) ──────────────────────────
 
+
 class TestIsValidAtOpenEnded:
     def test_at_valid_from_is_included(self) -> None:
         assert make_version(T0).is_valid_at(T0) is True
@@ -61,6 +63,7 @@ class TestIsValidAtOpenEnded:
 
 
 # ── is_valid_at: closed window [valid_from, valid_to) ───────────────────────
+
 
 class TestIsValidAtClosedWindow:
     def test_at_valid_from_is_included(self) -> None:
@@ -100,6 +103,7 @@ class TestIsValidAtClosedWindow:
 
 # ── timezone enforcement ─────────────────────────────────────────────────────
 
+
 class TestTimezoneEnforcement:
     def test_naive_timestamp_in_is_valid_at_raises(self) -> None:
         v = make_version(T0, T1)
@@ -116,6 +120,7 @@ class TestTimezoneEnforcement:
 
 
 # ── AssetVersion model defaults ──────────────────────────────────────────────
+
 
 class TestAssetVersionDefaults:
     def test_id_is_auto_assigned_uuid(self) -> None:
@@ -142,6 +147,7 @@ class TestAssetVersionDefaults:
 
 
 # ── enums ────────────────────────────────────────────────────────────────────
+
 
 class TestEnums:
     def test_all_four_asset_types(self) -> None:
@@ -180,6 +186,7 @@ class TestEnums:
 
 # ── AuditLogEntry ────────────────────────────────────────────────────────────
 
+
 class TestAuditLogEntry:
     def test_id_auto_assigned(self) -> None:
         entry = AuditLogEntry(
@@ -216,6 +223,7 @@ class TestAuditLogEntry:
 
 
 # ── AssetDefinition ──────────────────────────────────────────────────────────
+
 
 class TestAssetDefinition:
     def test_darkframe_definition(self) -> None:

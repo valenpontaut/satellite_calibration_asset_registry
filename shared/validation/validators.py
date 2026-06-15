@@ -32,9 +32,7 @@ class Npy2DFloatArrayValidator:
                 f"Expected 2D array, got {arr.ndim}D (shape {arr.shape})"
             )
         if not np.issubdtype(arr.dtype, np.floating):
-            raise AssetValidationError(
-                f"Expected float dtype, got {arr.dtype!r}"
-            )
+            raise AssetValidationError(f"Expected float dtype, got {arr.dtype!r}")
 
 
 _VICARIOUS_BANDS = frozenset({"blue", "green", "red", "nir"})
@@ -92,9 +90,7 @@ class BodyToPayloadJsonValidator:
         except json.JSONDecodeError as exc:
             raise AssetValidationError(f"Invalid JSON: {exc}") from exc
         if not isinstance(payload, dict) or "quaternion" not in payload:
-            raise AssetValidationError(
-                "Expected a JSON object with a 'quaternion' key"
-            )
+            raise AssetValidationError("Expected a JSON object with a 'quaternion' key")
         q = payload["quaternion"]
         if not isinstance(q, list):
             raise AssetValidationError(
