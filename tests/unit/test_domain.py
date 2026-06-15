@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from pydantic import ValidationError
@@ -18,7 +18,7 @@ from shared.domain import (
     StorageFormat,
 )
 
-UTC = timezone.utc
+UTC = UTC
 
 T0 = datetime(2028, 1, 1, tzinfo=UTC)
 T1 = datetime(2028, 6, 1, tzinfo=UTC)

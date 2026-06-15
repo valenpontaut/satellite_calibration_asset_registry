@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from enum import StrEnum
 from typing import Any
 
@@ -66,7 +66,5 @@ class AuditLogEntry(BaseModel):
     asset_version_id: uuid.UUID
     operation: AuditOperation
     operator_id: str
-    occurred_at: AwareDatetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    occurred_at: AwareDatetime = Field(default_factory=lambda: datetime.now(UTC))
     details: dict[str, Any]
