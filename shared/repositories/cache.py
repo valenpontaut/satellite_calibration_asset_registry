@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import redis.asyncio as aioredis
 
@@ -11,7 +11,7 @@ from shared.domain import AssetType
 
 
 def _truncate_to_second(ts: datetime) -> datetime:
-    return ts.astimezone(timezone.utc).replace(microsecond=0)
+    return ts.astimezone(UTC).replace(microsecond=0)
 
 
 def pit_cache_key(
@@ -87,12 +87,16 @@ class CacheRepositoryRedis(CacheRepository):
     async def get_dataset_version(
         self, satellite_id: str, asset_type: AssetType
     ) -> int:
-        val = await self._client.get(_dataset_version_redis_key(satellite_id, asset_type))
+        val = await self._client.get(
+            _dataset_version_redis_key(satellite_id, asset_type)
+        )
         return int(val) if val is not None else 0
 
     async def incr_dataset_version(
         self, satellite_id: str, asset_type: AssetType
     ) -> int:
         return int(
-            await self._client.incr(_dataset_version_redis_key(satellite_id, asset_type))
+            await self._client.incr(
+                _dataset_version_redis_key(satellite_id, asset_type)
+            )
         )

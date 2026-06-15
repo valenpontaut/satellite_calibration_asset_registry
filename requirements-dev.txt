@@ -3,3 +3,6 @@ pytest-cov
 ruff
 mypy
 bandit
+pydantic>=2
+fastapi
+uvicorn

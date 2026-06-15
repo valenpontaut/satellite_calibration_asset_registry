@@ -17,8 +17,8 @@ class Settings(BaseSettings):
     s3_secret_key: str = "minioadmin"
     s3_bucket: str = "scar-assets"
 
-    cache_long_ttl_seconds: int = 86400   # 24 h — closed/historical window
-    cache_short_ttl_seconds: int = 60     # 60 s — open-ended or not-found
+    cache_long_ttl_seconds: int = 86400  # 24 h — closed/historical window
+    cache_short_ttl_seconds: int = 60  # 60 s — open-ended or not-found
     presigned_url_expires_in: int = 3600  # 1 h
 
 

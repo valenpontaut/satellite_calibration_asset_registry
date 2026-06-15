@@ -39,8 +39,12 @@ class AssetResolutionService:
         asset_type: AssetType,
         timestamp: datetime,
     ) -> dict[str, Any]:
-        dataset_version = await self._cache.get_dataset_version(satellite_id, asset_type)
-        key = self._build_cache_key(satellite_id, asset_type, dataset_version, timestamp)
+        dataset_version = await self._cache.get_dataset_version(
+            satellite_id, asset_type
+        )
+        key = self._build_cache_key(
+            satellite_id, asset_type, dataset_version, timestamp
+        )
 
         hit = await self._cache.get(key)
         if hit is not None:

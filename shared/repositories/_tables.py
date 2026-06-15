@@ -1,9 +1,11 @@
 """SQLAlchemy Core table definitions shared by repositories and Alembic."""
+
 from __future__ import annotations
 
 import sqlalchemy as sa
 from sqlalchemy import MetaData
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 
 metadata = MetaData()
 

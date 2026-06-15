@@ -217,7 +217,9 @@ class AssetAdminService:
                     # Mirrored extend: existing window starts inside new window
                     # → push its start forward to new_to (always non-None here).
                     await self._metadata.update_version(
-                        conn, existing.id, valid_from=valid_to  # type: ignore[arg-type]
+                        conn,
+                        existing.id,
+                        valid_from=valid_to,  # type: ignore[arg-type]
                     )
                 audit_entries.append(
                     AuditLogEntry(

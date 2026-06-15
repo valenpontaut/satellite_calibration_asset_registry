@@ -1,7 +1,8 @@
 """Unit tests for cache key helpers — no infrastructure required."""
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from shared.domain import AssetType
 from shared.repositories.cache import (
@@ -10,7 +11,7 @@ from shared.repositories.cache import (
     pit_cache_key,
 )
 
-UTC = timezone.utc
+UTC = UTC
 
 
 class TestPitCacheKey:
@@ -57,7 +58,10 @@ class TestBulkCacheKey:
     def test_format_matches_spec(self) -> None:
         ts = datetime(2028, 3, 15, 12, 0, 0, tzinfo=UTC)
         key = bulk_cache_key("body_to_payload=1,darkframe=3", "newsat53", ts)
-        assert key == "vbody_to_payload=1,darkframe=3:newsat53:bulk:2028-03-15T12:00:00+00:00"
+        assert (
+            key == "vbody_to_payload=1,darkframe=3:"
+            "newsat53:bulk:2028-03-15T12:00:00+00:00"
+        )
 
     def test_sub_second_precision_is_truncated(self) -> None:
         ts_micro = datetime(2028, 1, 1, 0, 0, 0, 999_999, tzinfo=UTC)
