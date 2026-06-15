@@ -1,0 +1,62 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- Testing & coverage ---
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+
+# --- Type checking / linting ---
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+dmypy.json
+
+# --- Environment / secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Docker / Compose volumes (if mounted to local dirs) ---
+docker-compose.override.yml
+volumes/
+data/
+
+# --- Alembic ---
+# (keep migration scripts, ignore any local sqlite used for quick testing)
+*.sqlite3
+*.db
+
+# --- Object storage local dev (e.g. minio data dir) ---
+.minio/
+minio-data/
+
+# --- IDE / editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+
+# --- Claude Code / local skill working files (optional) ---
+.claude/local/
