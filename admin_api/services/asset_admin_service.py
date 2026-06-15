@@ -191,7 +191,7 @@ class AssetAdminService:
                     satellite_id=existing.satellite_id,
                     asset_type=existing.asset_type,
                     schema_version=existing.schema_version,
-                    valid_from=valid_to,  # type: ignore[arg-type]
+                    valid_from=valid_to,
                     valid_to=existing.valid_to,
                     blob_ref=existing.blob_ref,
                 )
@@ -219,7 +219,7 @@ class AssetAdminService:
                     await self._metadata.update_version(
                         conn,
                         existing.id,
-                        valid_from=valid_to,  # type: ignore[arg-type]
+                        valid_from=valid_to,
                     )
                 audit_entries.append(
                     AuditLogEntry(

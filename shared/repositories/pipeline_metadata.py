@@ -4,31 +4,37 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 import sqlalchemy as sa
+from sqlalchemy.engine import RowMapping
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from shared.domain import AssetType, AssetVersion
 from shared.repositories._tables import asset_versions
 
 
-def _row_to_asset_version(row: sa.engine.Row) -> AssetVersion:  # type: ignore[type-arg]
-    return AssetVersion(
-        id=row.id,
-        satellite_id=row.satellite_id,
-        asset_type=AssetType(row.asset_type),
-        schema_version=row.schema_version,
-        valid_from=row.valid_from,
-        valid_to=row.valid_to,
-        blob_ref=row.blob_ref,
+def _active_at(ts: datetime) -> sa.ColumnElement[bool]:
+    return sa.and_(
+        asset_versions.c.valid_from <= ts,
+        sa.or_(
+            asset_versions.c.valid_to.is_(None),
+            asset_versions.c.valid_to > ts,
+        ),
     )
 
 
-_ACTIVE_AT = lambda ts: sa.and_(  # noqa: E731
-    asset_versions.c.valid_from <= ts,
-    sa.or_(
-        asset_versions.c.valid_to.is_(None),
-        asset_versions.c.valid_to > ts,
-    ),
-)
+def _row_to_asset_version(row: RowMapping) -> AssetVersion:
+    return AssetVersion(
+        id=row["id"],
+        asset_type=AssetType(row["asset_type"]),
+        satellite_id=row["satellite_id"],
+        version=row["version"],
+        schema_version=row["schema_version"],
+        blob_ref=row["blob_ref"],
+        uri=row["uri"],
+        checksum=row["checksum"],
+        valid_from=row["valid_from"],
+        valid_to=row["valid_to"],
+        created_at=row["created_at"],
+    )
 
 
 class PipelineMetadataRepository(ABC):
@@ -63,13 +69,15 @@ class PipelineMetadataRepositoryPostgres(PipelineMetadataRepository):
             .where(
                 asset_versions.c.satellite_id == satellite_id,
                 asset_versions.c.asset_type == asset_type.value,
-                _ACTIVE_AT(timestamp),
+                _active_at(timestamp),
             )
             .limit(1)
         )
+
         async with self._engine.connect() as conn:
             row = (await conn.execute(query)).fetchone()
-        return _row_to_asset_version(row) if row else None
+
+        return _row_to_asset_version(row._mapping) if row else None
 
     async def find_bulk(
         self,
@@ -78,12 +86,15 @@ class PipelineMetadataRepositoryPostgres(PipelineMetadataRepository):
     ) -> dict[AssetType, AssetVersion | None]:
         query = sa.select(asset_versions).where(
             asset_versions.c.satellite_id == satellite_id,
-            _ACTIVE_AT(timestamp),
+            _active_at(timestamp),
         )
+
         async with self._engine.connect() as conn:
             rows = (await conn.execute(query)).fetchall()
 
         found: dict[AssetType, AssetVersion] = {
-            AssetType(row.asset_type): _row_to_asset_version(row) for row in rows
+            AssetType(row._mapping["asset_type"]): _row_to_asset_version(row._mapping)
+            for row in rows
         }
-        return {at: found.get(at) for at in AssetType}
+
+        return {asset_type: found.get(asset_type) for asset_type in AssetType}

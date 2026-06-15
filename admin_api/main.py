@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     )
     yield
     await engine.dispose()
-    await redis_client.aclose()
+    await redis_client.close()
 
 
 app = FastAPI(title="SCAR Admin API", version="0.1.0", lifespan=lifespan)

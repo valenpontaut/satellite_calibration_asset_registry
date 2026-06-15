@@ -3,6 +3,12 @@ pytest-cov
 ruff
 mypy
 bandit
+
 pydantic>=2
+pydantic-settings
+
 fastapi
 uvicorn
+
+sqlalchemy
+redis
