@@ -14,3 +14,4 @@ redis
 boto3
 numpy
 pytest-asyncio
+httpx2
