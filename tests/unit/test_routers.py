@@ -58,7 +58,9 @@ def _make_mock_redis() -> AsyncMock:
 
 def _make_mock_s3() -> MagicMock:
     s3 = MagicMock()
-    s3.head_bucket = MagicMock(return_value={"ResponseMetadata": {"HTTPStatusCode": 200}})
+    s3.head_bucket = MagicMock(
+        return_value={"ResponseMetadata": {"HTTPStatusCode": 200}}
+    )
     return s3
 
 
