@@ -4,10 +4,12 @@ import uuid
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import JSONResponse
 from pydantic import AwareDatetime, BaseModel
 
 from admin_api.services.asset_admin_service import AssetAdminService
 from shared.domain import AssetType
+from shared.health import check_dependencies
 from shared.validation.validators import AssetValidationError
 
 router = APIRouter()
@@ -23,8 +25,18 @@ class RetireRequest(BaseModel):
 
 
 @router.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok"}
+async def health(request: Request) -> JSONResponse:
+    deps = await check_dependencies(
+        engine=request.app.state.engine,
+        redis_client=request.app.state.redis_client,
+        s3_client=request.app.state.s3_client,
+        s3_bucket=request.app.state.s3_bucket,
+    )
+    status = "ok" if all(v == "ok" for v in deps.values()) else "degraded"
+    return JSONResponse(
+        {"status": status, "dependencies": deps},
+        status_code=200 if status == "ok" else 503,
+    )
 
 
 @router.post("/assets", status_code=201)

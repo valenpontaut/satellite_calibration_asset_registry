@@ -3,10 +3,12 @@ from __future__ import annotations
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Request
+from fastapi.responses import JSONResponse
 from pydantic import AwareDatetime
 
 from pipeline_api.services.asset_resolution_service import AssetResolutionService
 from shared.domain import AssetType
+from shared.health import check_dependencies
 
 router = APIRouter()
 
@@ -16,8 +18,18 @@ def _get_service(request: Request) -> AssetResolutionService:
 
 
 @router.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok"}
+async def health(request: Request) -> JSONResponse:
+    deps = await check_dependencies(
+        engine=request.app.state.engine,
+        redis_client=request.app.state.redis_client,
+        s3_client=request.app.state.s3_client,
+        s3_bucket=request.app.state.s3_bucket,
+    )
+    status = "ok" if all(v == "ok" for v in deps.values()) else "degraded"
+    return JSONResponse(
+        {"status": status, "dependencies": deps},
+        status_code=200 if status == "ok" else 503,
+    )
 
 
 @router.get("/resolve")

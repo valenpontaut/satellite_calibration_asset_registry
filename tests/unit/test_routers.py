@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -39,10 +39,37 @@ def _make_version(
     )
 
 
+def _make_mock_engine() -> MagicMock:
+    mock_conn = AsyncMock()
+    mock_conn.execute = AsyncMock()
+    ctx = AsyncMock()
+    ctx.__aenter__ = AsyncMock(return_value=mock_conn)
+    ctx.__aexit__ = AsyncMock(return_value=None)
+    engine = MagicMock()
+    engine.connect = MagicMock(return_value=ctx)
+    return engine
+
+
+def _make_mock_redis() -> AsyncMock:
+    redis = AsyncMock()
+    redis.ping = AsyncMock(return_value=True)
+    return redis
+
+
+def _make_mock_s3() -> MagicMock:
+    s3 = MagicMock()
+    s3.head_bucket = MagicMock(return_value={"ResponseMetadata": {"HTTPStatusCode": 200}})
+    return s3
+
+
 def _admin_client(mock_service: AsyncMock) -> TestClient:
     app = FastAPI()
     app.include_router(admin_router)
     app.state.service = mock_service
+    app.state.engine = _make_mock_engine()
+    app.state.redis_client = _make_mock_redis()
+    app.state.s3_client = _make_mock_s3()
+    app.state.s3_bucket = "test-bucket"
     return TestClient(app)
 
 
@@ -50,6 +77,10 @@ def _pipeline_client(mock_service: AsyncMock) -> TestClient:
     app = FastAPI()
     app.include_router(pipeline_router)
     app.state.service = mock_service
+    app.state.engine = _make_mock_engine()
+    app.state.redis_client = _make_mock_redis()
+    app.state.s3_client = _make_mock_s3()
+    app.state.s3_bucket = "test-bucket"
     return TestClient(app)
 
 
@@ -146,7 +177,11 @@ def test_admin_health_returns_ok():
     client = _admin_client(AsyncMock())
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    body = response.json()
+    assert body["status"] == "ok"
+    assert body["dependencies"]["metadata_store"] == "ok"
+    assert body["dependencies"]["cache"] == "ok"
+    assert body["dependencies"]["object_storage"] == "ok"
 
 
 # ── pipeline API ──────────────────────────────────────────────────────────────
@@ -242,4 +277,8 @@ def test_pipeline_health_returns_ok():
     client = _pipeline_client(AsyncMock())
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    body = response.json()
+    assert body["status"] == "ok"
+    assert body["dependencies"]["metadata_store"] == "ok"
+    assert body["dependencies"]["cache"] == "ok"
+    assert body["dependencies"]["object_storage"] == "ok"
