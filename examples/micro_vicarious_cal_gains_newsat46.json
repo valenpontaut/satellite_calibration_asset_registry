@@ -1,0 +1,18 @@
+{
+    "blue": {
+        "scale_factor": 0.989,
+        "bias_factor": 0
+    },
+    "green": {
+        "scale_factor": 0.956,
+        "bias_factor": 0
+    },
+    "red": {
+        "scale_factor": 0.976,
+        "bias_factor": 0
+    },
+    "nir": {
+        "scale_factor": 0.904,
+        "bias_factor": 0
+    }
+}
