@@ -85,6 +85,8 @@ Replace `<version-id>` with the UUID returned by the upload response.
 curl http://localhost:8000/health
 ```
 
+Returns `{"status": "ok", "dependencies": {"metadata_store": "ok", "cache": "ok", "object_storage": "ok"}}` (HTTP 200), or `{"status": "degraded", "dependencies": {...}}` (HTTP 503) if any dependency is unreachable.
+
 #### Pipeline API (port 8001)
 
 **Point-in-time resolution**
@@ -110,6 +112,8 @@ Asset types with no active version appear as `found: false` — they are never o
 ```bash
 curl http://localhost:8001/health
 ```
+
+Returns `{"status": "ok", "dependencies": {"metadata_store": "ok", "cache": "ok"}}` (HTTP 200), or `{"status": "degraded", "dependencies": {...}}` (HTTP 503) if any dependency is unreachable.
 
 ---
 
