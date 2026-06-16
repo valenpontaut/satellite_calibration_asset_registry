@@ -36,11 +36,21 @@ class ObjectStorageRepositoryS3(ObjectStorageRepository):
         endpoint_url: str,
         access_key: str,
         secret_key: str,
+        public_url: str = "",
     ) -> None:
         self._bucket = bucket
+        self._endpoint_url = endpoint_url
+        self._public_url = public_url or endpoint_url
         self._client: Any = boto3.client(
             "s3",
             endpoint_url=endpoint_url,
+            aws_access_key_id=access_key,
+            aws_secret_access_key=secret_key,
+            config=BotocoreConfig(signature_version="s3v4"),
+        )
+        self._public_client: Any = boto3.client(
+            "s3",
+            endpoint_url=self._public_url,
             aws_access_key_id=access_key,
             aws_secret_access_key=secret_key,
             config=BotocoreConfig(signature_version="s3v4"),
@@ -51,7 +61,7 @@ class ObjectStorageRepositoryS3(ObjectStorageRepository):
         return key
 
     def generate_presigned_url(self, blob_ref: str, expires_in_seconds: int) -> str:
-        return self._client.generate_presigned_url(  # type: ignore[no-any-return]
+        return self._public_client.generate_presigned_url(  # type: ignore[no-any-return]
             "get_object",
             Params={"Bucket": self._bucket, "Key": blob_ref},
             ExpiresIn=expires_in_seconds,
