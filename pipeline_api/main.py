@@ -87,6 +87,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             endpoint_url=settings.s3_endpoint_url,
             access_key=settings.s3_access_key,
             secret_key=settings.s3_secret_key,
+            public_url=settings.s3_public_url,
         ),
         settings=settings,
     )
