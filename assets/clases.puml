@@ -1,5 +1,4 @@
 @startuml
-
 skinparam backgroundColor white
 skinparam classBackgroundColor white
 skinparam classBorderColor black
@@ -38,34 +37,34 @@ package "shared.domain" {
         +UUID id
         +String satellite_id
         +AssetType asset_type
-        +Integer schema_version
+        +String schema_version
         +Datetime valid_from
         +Datetime valid_to
         +String blob_ref
-
         +is_valid_at(timestamp)
     }
 
     class AuditLogEntry {
         +UUID id
-        +Datetime timestamp
-        +String operator_id
-        +AuditOperation operation
         +UUID asset_version_id
+        +AuditOperation operation
+        +String operator_id
+        +Datetime occurred_at
         +Map details
     }
 
     class AssetDefinition {
         +AssetType asset_type
-        +Integer current_schema_version
+        +String schema_version
         +StorageFormat storage_format
+        +String description
     }
 }
 
 package "shared.validation" {
 
     interface AssetValidator {
-        +validate(file)
+        +validate(data: bytes)
     }
 
     class Npy2DFloatArrayValidator
@@ -73,46 +72,51 @@ package "shared.validation" {
     class BodyToPayloadJsonValidator
 
     class AssetValidationService {
-        +validate(asset_type, file)
+        +validate(asset_type, data: bytes): ValidatedAsset
     }
 
     class AssetDefinitionRegistry {
-        +get_definition(asset_type)
+        +get_definition(asset_type): AssetDefinition
+        +get_validator(asset_type): AssetValidator
     }
 
     class ValidatedAsset {
         +AssetType asset_type
-        +Integer schema_version
+        +String schema_version
         +StorageFormat storage_format
     }
 }
 
 package "shared.repositories" {
 
-    class AdminMetadataRepository {
+    abstract class AdminMetadataRepository {
         +find_overlapping()
         +insert_version()
         +update_version()
         +delete_version()
         +insert_audit_log()
     }
+    class AdminMetadataRepositoryPostgres
 
-    class PipelineMetadataRepository {
+    abstract class PipelineMetadataRepository {
         +find_point_in_time()
         +find_bulk()
     }
+    class PipelineMetadataRepositoryPostgres
 
-    class CacheRepository {
+    abstract class CacheRepository {
         +get()
         +set()
         +get_dataset_version()
         +incr_dataset_version()
     }
+    class CacheRepositoryRedis
 
-    class ObjectStorageRepository {
+    abstract class ObjectStorageRepository {
         +put_object()
         +generate_presigned_url()
     }
+    class ObjectStorageRepositoryS3
 }
 
 package "admin_api.services" {
@@ -120,7 +124,6 @@ package "admin_api.services" {
     class AssetAdminService {
         +create_asset_version()
         +retire_asset_version()
-
         -resolve_overlaps()
         -classify_overlap()
     }
@@ -131,34 +134,37 @@ package "pipeline_api.services" {
     class AssetResolutionService {
         +resolve_point_in_time()
         +resolve_bulk()
-
         -build_cache_key()
         -ttl_for()
     }
 }
 
+' ── domain ────────────────────────────────────────────────────
 AssetVersion --> AssetType
 AssetVersion --> StorageFormat
-
 AuditLogEntry --> AuditOperation
 AuditLogEntry --> AssetVersion
-
 AssetDefinition --> AssetType
 AssetDefinition --> StorageFormat
 
+' ── validation ────────────────────────────────────────────────
 AssetValidator <|.. Npy2DFloatArrayValidator
 AssetValidator <|.. VicariousCalGainsJsonValidator
 AssetValidator <|.. BodyToPayloadJsonValidator
-
 AssetValidationService --> AssetDefinitionRegistry
 AssetValidationService --> AssetValidator
 AssetValidationService --> ValidatedAsset
 
+' ── repositories ──────────────────────────────────────────────
+AdminMetadataRepository <|-- AdminMetadataRepositoryPostgres
+PipelineMetadataRepository <|-- PipelineMetadataRepositoryPostgres
+CacheRepository <|-- CacheRepositoryRedis
+ObjectStorageRepository <|-- ObjectStorageRepositoryS3
 AdminMetadataRepository --> AssetVersion
 AdminMetadataRepository --> AuditLogEntry
-
 PipelineMetadataRepository --> AssetVersion
 
+' ── services ──────────────────────────────────────────────────
 AssetAdminService --> AssetValidationService
 AssetAdminService --> AdminMetadataRepository
 AssetAdminService --> CacheRepository
@@ -168,5 +174,4 @@ AssetAdminService --> OverlapType
 AssetResolutionService --> PipelineMetadataRepository
 AssetResolutionService --> CacheRepository
 AssetResolutionService --> ObjectStorageRepository
-
 @enduml
