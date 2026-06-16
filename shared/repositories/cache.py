@@ -72,7 +72,7 @@ class CacheRepository(ABC):
 
 
 class CacheRepositoryRedis(CacheRepository):
-    def __init__(self, client: aioredis.Redis) -> None: # type: ignore[type-arg]
+    def __init__(self, client: aioredis.Redis) -> None:  # type: ignore[type-arg]
         self._client = client
 
     async def get(self, key: str) -> str | None:
