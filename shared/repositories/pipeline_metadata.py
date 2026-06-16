@@ -21,19 +21,15 @@ def _active_at(ts: datetime) -> sa.ColumnElement[bool]:
     )
 
 
-def _row_to_asset_version(row: RowMapping) -> AssetVersion:
+def _row_to_asset_version(row: sa.engine.Row) -> AssetVersion:
     return AssetVersion(
-        id=row["id"],
-        asset_type=AssetType(row["asset_type"]),
-        satellite_id=row["satellite_id"],
-        version=row["version"],
-        schema_version=row["schema_version"],
-        blob_ref=row["blob_ref"],
-        uri=row["uri"],
-        checksum=row["checksum"],
-        valid_from=row["valid_from"],
-        valid_to=row["valid_to"],
-        created_at=row["created_at"],
+        id=row.id,
+        satellite_id=row.satellite_id,
+        asset_type=AssetType(row.asset_type),
+        schema_version=row.schema_version,
+        valid_from=row.valid_from,
+        valid_to=row.valid_to,
+        blob_ref=row.blob_ref,
     )
 
 
