@@ -14,6 +14,7 @@ dependencies = [
     "sqlalchemy[asyncio]>=2.0",
     "alembic>=1.13",
     "asyncpg>=0.29",
+    "psycopg2-binary>=2.9",
     "redis[asyncio]>=5.0",
     "boto3>=1.34",
     "numpy>=1.26",
@@ -31,7 +32,6 @@ dev = [
     "boto3-stubs[s3]>=1.34",
     "types-redis>=4.6",
     "moto[s3]>=5.0",
-    "psycopg2-binary>=2.9",
     "testcontainers[postgresql,redis]>=4.7",
 ]
 
