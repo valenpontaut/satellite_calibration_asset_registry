@@ -21,7 +21,7 @@ from shared.repositories import (
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     engine = create_async_engine(settings.database_url)
-    redis_client: aioredis.Redis = aioredis.from_url(  # type: ignore[type-arg]
+    redis_client: aioredis.Redis[str] = aioredis.from_url(
         settings.redis_url, decode_responses=False
     )
     app.state.service = AssetResolutionService(
