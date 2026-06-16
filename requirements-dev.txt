@@ -15,3 +15,4 @@ boto3
 numpy
 pytest-asyncio
 httpx2
+python-multipart
