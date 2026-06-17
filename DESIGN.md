@@ -118,6 +118,10 @@ A single, generalized algorithm handles all admin write operations:
 
     A single write can produce **multiple** affected rows — e.g., a new version can simultaneously extend-truncate one neighboring version and mirrored-extend another. Each affected row is classified and handled independently; all resulting mutations and audit entries are part of the same atomic transaction (step 6 below covers exactly one row insertion regardless of how many existing rows were touched).
 
+    <p align="center">
+      <img src="assets/overlap_cases.png" width="70%">
+    </p>
+
 5. **Insert the new version row** together with its `schema_version`.
 6. **Insert the audit log entry**.
 7. **Increment the cache dataset version** for `(satellite, asset_type)`.
